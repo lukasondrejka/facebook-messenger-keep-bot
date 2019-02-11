@@ -11,13 +11,14 @@ class KeepBot(Client):
 
     listening = True
 
+    default_color = ThreadColor.MESSENGER_BLUE
+    default_emoji = ''
+
+    ''' __INIT__ METHOD '''
+
     def __init__(self, email, password, db_file_name='db.sqlite3', max_tries=1, *args, **kwargs):
         self.email = email
         self.password = password
-
-        # Default vars
-        self.default_color = ThreadColor.MESSENGER_BLUE
-        self.default_emoji = ""
 
         # SQLITE
         self.conn = sqlite3.connect(db_file_name)
@@ -81,12 +82,14 @@ class KeepBot(Client):
         if self.listening == True:
             self.listen()
 
+    ''' END __INIT__ METHOD '''
+
     ''' GET METHODS '''
 
     def getColor(self, thread_id):
-        self.c.execute('''SELECT color FROM threads WHERE thread_id = ?''', (thread_id, ))
+        self.c.execute('SELECT color FROM threads WHERE thread_id = ?', (thread_id, ))
         color = self.c.fetchone()
-        print(color)
+
         if color and color[0]:
             color = graphql_color_to_enum(" " + color[0])
             return color
@@ -95,11 +98,13 @@ class KeepBot(Client):
             return self.default_color
 
     def getEmoji(self, thread_id):
-        self.c.execute('''SELECT emoji FROM threads WHERE thread_id = ?''', (thread_id, ))
+        self.c.execute('SELECT emoji FROM threads WHERE thread_id = ?', (thread_id, ))
         emoji = self.c.fetchone()
 
-        if emoji:
+        if emoji and emoji[0]:
             emoji = emoji[0]
+            if emoji == None:
+                emoji = ""
             return emoji
         else:
             self.updateEmoji(thread_id, self.default_emoji)
@@ -117,6 +122,7 @@ class KeepBot(Client):
             return ""
 
     ''' END GET METHODS '''
+
     ''' UPDATE METHODS '''
 
     def updateColor(self, thread_id, color):
@@ -174,6 +180,7 @@ class KeepBot(Client):
         self.conn.commit()
 
     ''' END UPDATE METHODS '''
+
     ''' ON CHANGE METHODS '''
 
     def onColorChange(self, author_id, new_color, thread_id, thread_type, **kwargs):
