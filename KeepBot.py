@@ -205,7 +205,7 @@ class KeepBot(Client):
 
     def onNicknameChange(self, author_id, changed_for, new_nickname, thread_id, thread_type, **kwargs):
         old_nickname = self.getNickname(thread_id, changed_for)
-        if old_nickname != new_nickname and (thread_type == ThreadType.USER or (thread_type == ThreadType.GROUP and changed_for == self.uid)):
+        if old_nickname != new_nickname and (thread_type == ThreadType.USER or (thread_type == ThreadType.GROUP and (changed_for == self.uid or len(self.fetchGroupInfo(thread_id)[thread_id].participants) == 2 ))):
             if author_id == self.uid:
                 log.info("{} changed {}'s nickname to {}.".format(author_id, changed_for, new_nickname))
                 self.updateNickname(thread_id, changed_for, new_nickname)
